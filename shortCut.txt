@@ -1,0 +1,15 @@
+http://shuoranzhang.com/project/poker/api.php?a=cng&p=1,2,3,4,5,6&m=1
+http://shuoranzhang.com/project/poker/api.php?a=gtc&p=1					
+http://shuoranzhang.com/project/poker/api.php?a=fcr&p=10				
+http://shuoranzhang.com/project/poker/api.php?a=pdc&p=2&c=123213212
+http://shuoranzhang.com/project/poker/api.php?a=gcr
+
+
+
+手动：
+
+开始新游戏
+http://shuoranzhang.com/project/poker/api.php?a=cng&p=9,2,12,14,1,10,11,13&m=14&r=2
+
+结束一轮，并加分
+http://shuoranzhang.com/project/poker/api.php?a=fcr&p=10	

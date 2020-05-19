@@ -4,10 +4,13 @@ $(document).ready(function(){
 	var hideCardAmount;
 	var tablePosition;
 	var trumpRank, trumpSuit;
-	
+	var startTime = new Date();
 	
 	var cardDeck = $("#cardDeck").playingCards();
 	updateCurrentTable();
+	
+	var cronJob = setInterval(cronJobUpdateTable, 5000);
+	
 	if (cardDeck.count() > 26) {
 		var hideCardAmountWord = "";
 		hideCardAmount = 0;
@@ -59,7 +62,7 @@ $(document).ready(function(){
 				}
 				alert(alertSuit + "哦了");
 			} else {
-				alert("花色已被别人定了");
+				alert("花色已经定了");
 			}
 		});
 		function sendSuitToServer(suit){
@@ -98,7 +101,7 @@ $(document).ready(function(){
 	var doDrawCard = function(){
 		var c = cardDeck.draw();
 		if(!c){
-			showError('no more cards');
+			alert('no more cards');
 			return;
 		}
 		hand[hand.length] = c;
@@ -135,7 +138,7 @@ $(document).ready(function(){
 	});
 	$('#addCard').click(function(){
 		if(!hand.length){
-			showError('都没牌了你退啥');
+			alert('都没牌了你退啥');
 			return;
 		}
 		var c = hand.pop();
@@ -151,12 +154,24 @@ $(document).ready(function(){
 	$(document).on("click", "#cardDeck .playingCard" , function() {
 		var c = cardDeck.drawByIndex($(this).index());
 		if(!c){
-			showError('恭喜你出完啦');
+			alert('恭喜你出完啦');
 			return;
 		}
 		hand[hand.length] = c;
 		cardDeck.spread();
 		showHand();
+	});
+	
+	$(document).on("click", "#yourHand .playingCard" , function() {
+		if (hand.length <= 0) {
+			return false;
+		}
+		var removed = hand.splice($(this).index(),1);
+		var c = removed[0];
+		showHand();
+		cardDeck.addCard(c);
+		doOrderAllInOne();
+		cardDeck.spread();
 	});
 	
 	var hide = [];
@@ -201,7 +216,31 @@ $(document).ready(function(){
 		}
 	}
 	var regretCard = function() {
+		var regretCardsArray;
+		regretPostedCard(playerID).done(function(data){
+			if (data == "empty" || data == "error") {
+				alert("无牌可悔");
+			} else {
+				regretCardsArray = JSON.parse(data);
+				for (var i = 0; i < regretCardsArray.length; i++) {
+					var r = regretCardsArray[i]["r"];
+					var s = regretCardsArray[i]["s"];
+					var c = cardDeck.createCardByRankSuit(r, s);
+					cardDeck.addCard(c);
+					doOrderAllInOne();
+					cardDeck.spread();
+				}
+				$('#tablePlayer_'+tablePosition).html('');
+			}
+		});
 		
+		function regretPostedCard(pid){
+			return $.ajax({
+				type: 'POST',
+				url: "api.php?a=rpc&p="+pid,
+				async:false
+			});
+		}
 	}
 	var checkTable = function  (){
 		updateCurrentTable();
@@ -210,6 +249,38 @@ $(document).ready(function(){
 	$('#sendCard').click(sendCard);
 	$('#regretCard').click(regretCard);
 	$('#checkTable').click(checkTable);
+	$(document).keydown(function(e) {
+		var currentPos = parseInt($("#cardDeck").css('padding-left'));
+		if(currentPos < 70 && e.keyCode == 37){
+			cardMarginAdjustment("left", currentPos);
+		} else if (currentPos > 0 && e.keyCode == 39){
+			cardMarginAdjustment("right", currentPos);
+		}
+	});
+	
+	function cardMarginAdjustment(direction, currentPos){
+		
+		if (direction == "left"){
+			$("#cardDeck").css('padding-left', (currentPos + 1)+'px');
+			$("#yourHand").css('padding-left', (currentPos - 4)+'px');
+			$("#cardDeck .playingCard").css('margin-left',(4 - currentPos)+'px');
+			$("#yourHand .playingCard").css('margin-left',(4 - currentPos)+'px');
+		}
+		if (direction == "right"){
+			$("#cardDeck").css('padding-left', (currentPos - 1)+'px');
+			$("#yourHand").css('padding-left', (currentPos - 6)+'px');
+			$("#cardDeck .playingCard").css('margin-left',(6 - currentPos)+'px');
+			$("#yourHand .playingCard").css('margin-left',(6 - currentPos)+'px');
+		}
+		
+	}
+	
+	function cronJobUpdateTable() {
+		updateCurrentTable();
+		if (new Date().getTime() - startTime.getTime() > 1000 * 60* 10) {
+			clearTimeout(cronJob);
+		}
+	}
 	
 	function updateCurrentTable() {
 		$('#theTable').html('');
@@ -243,8 +314,14 @@ $(document).ready(function(){
 		
 		playersCurrentCards = currentTableArray['pl'];
 		playerAmount = playersCurrentCards.length;
+		var tablePlayerCss = "width: 16%;margin: 14px;padding-left:65px;";
+		if (playerAmount == 6) {
+			tablePlayerCss = "width: 24%;margin: 14px;padding-left:65px;";
+		} else if (playerAmount == 10) {
+			tablePlayerCss = "width: 12%;margin: 8px;padding-left:65px;";
+		}
 		for (var i = 0; i < playerAmount; i++) {
-			$('#theTable').append('<div class="tablePlayer" id="tablePlayer_' + i + '"></div>');
+			$('#theTable').append('<div class="tablePlayer" style="'+tablePlayerCss+'" id="tablePlayer_' + i + '"></div>');
 		}
 		playersCurrentCards.forEach(updateCurrentTableUI);
 		
@@ -279,7 +356,7 @@ $(document).ready(function(){
 		function updateTableCSS(names, index) {
 			Object.keys(names).forEach(function(key) {
 				// console.log(key + names + index);
-				var imageUrl = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='50px' width='220px'><text x='0' y='15' fill='gray' font-size='20'>player "+(index+1)+" => "+names[key]+"</text></svg>";
+				var imageUrl = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='50px' width='240px'><text x='0' y='15' fill='gray' font-size='20' transform='translate(5,30) rotate(-10)'>player "+(index+1)+" => "+names[key]+"</text></svg>";
 				$("#tablePlayer_"+index).css("background-image", "url(\"" + imageUrl + "\")");
 			});
 		}

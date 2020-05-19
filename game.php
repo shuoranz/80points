@@ -13,7 +13,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-    <title>80 points</title>
+    <title>丐版80分</title>
 
     <link rel="stylesheet" type="text/css" media="all" href="playingCards.ui.css"/>
     <style type="text/css">
@@ -46,17 +46,35 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
         }
 		.tablePlayer{
 			border:1px dashed #f60;
-			height: 6.5em;
-			width: 45%;
+			height: 6.4em;
+			width: 16%;
 			float: left;
 			position: relative;
-			margin: 10px;
+			margin: 14px;
+			/* padding-left: 65px; */
+			padding-left: 0;
 			/*
 			background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='50px' width='170px'><text x='0' y='15' fill='gray' font-size='20'></text></svg>");
 			*/
 		}
 		#yourHand{
-			height: 6.5em;
+			height: 6.4em;
+			border:1px dashed #f60;
+			margin: 5px;
+			/* padding-left: 65px; */
+			padding-left: 0;
+		}
+		#cardDeck{
+			/* padding-left: 70px; */
+			padding-left: 5px;
+		}
+		.playingCard{
+			/* margin-left: -65px; */
+			margin-left: 0;
+		}
+		
+		#theTable .playingCard{
+			margin-left: -65px;
 		}
 		
     </style>
@@ -71,41 +89,45 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     <input type="hidden" id="draw" value="draw a card" />
     <input type="hidden" id="shuffleDraw" value="shuffle, then draw" />
     <input type="hidden" id="shuffleSpreadSlow" value="shuffle, then layout slowly" />
-    
-	<h2>桌面的牌, <span id="showPoint"></span><span id="showTrumpRank"></span></h2>
+    <div class="info">
+		<p>账号: <?php echo $_SESSION["username"]; ?>, ID: <span id="pid"><?php echo $_SESSION["id"]; ?></span></p>
+	</div>
+	<h2>桌面牌, <span id="showPoint"></span><span id="showTrumpRank"></span></h2>
 	<input type="hidden" id="shuffler" value="打散" />
 	<!--
 	<input type="button" id="orderByRank" value="按大小排序" />
     <input type="button" id="orderBySuit" value="按花色排序" />
 	<input type="button" id="orderByTrump" value="按主牌排序" />
 	-->
+	
+    <div id="theTable"></div>
+	<br/><br/>
+	
+	
+	
+	<!--<h2>要出的牌</h2>-->
+	
+	<br/><br/>
+    
+	
+	<h2>手中牌</h2>
+	<input type="button" id="hideCard" value="扣牌" style="display:none;"/>
+	<input type="button" id="sendCard" value="出牌" />
+	<input type="button" id="regretCard" value="悔牌" />
+	<input type="hidden" id="addCard" value="把没出的牌放回手中" />
+	
 	<input type="button" id="orderAllInOne" value="码牌" />
-	<input type="button" id="checkTable" value="看桌上的牌" />
+	<input type="button" id="checkTable" value="刷新桌面" />
 	<span>叫主花色:</span>
 	<input type="button" id="setTrumpDiamond" value="方片" />
 	<input type="button" id="setTrumpClub" value="草花" />
 	<input type="button" id="setTrumpHeart" value="红桃" />
 	<input type="button" id="setTrumpSpade" value="黑桃" />
-    <div id="theTable"></div>
-	<br/><br/>
-	
-	<h2>手中牌</h2>
+	<div id="yourHand"></div>
     <div id="cardDeck"></div>
 	
-	<h2>要出的牌</h2>
-	<input type="button" id="hideCard" value="扣牌" style="display:none;"/>
-	<input type="button" id="sendCard" value="出牌" />
-	<input type="button" id="regretCard" value="把本轮出的牌拿回手里" />
-	<input type="button" id="addCard" value="把没出的牌放回手中" />
 	<br/><br/>
-    <div id="yourHand"></div>
 	
-	
-	
-	<br/><br/>
-	<div>
-		<p>player name: <?php echo $_SESSION["username"]; ?>, ID: <span id="pid"><?php echo $_SESSION["id"]; ?></span></p>
-	</div>
 	
     
     

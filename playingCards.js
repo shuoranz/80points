@@ -91,7 +91,7 @@ if (Array.indexOf === undefined) {
 			if (r != "N") {
 				this.cards[l] = new playingCards.card(r, o.ranks[r], s, o.suits[s]);
 			} else {
-				this.cards[l] = new playingCards.card("N", o.jokerText, s, '');
+				this.cards[l] = new playingCards.card("N", o.jokerText[s], s, '');
 			}
 		}
 		
@@ -122,7 +122,7 @@ if (Array.indexOf === undefined) {
     };
 	playingCards.prototype.createCardByRankSuit = function(r, s) {
 		var o = this.conf;
-		return r != "N" ? new playingCards.card(r, o.ranks[r], s, o.suits[s]) : new playingCards.card("N", o.jokerText, s, '');
+		return r != "N" ? new playingCards.card(r, o.ranks[r], s, o.suits[s]) : new playingCards.card("N", o.jokerText[s], s, '');
 	};
 	playingCards.prototype.drawByIndex = function(index) {
 		if (this.cards.length <= 0) {
@@ -211,7 +211,11 @@ if (Array.indexOf === undefined) {
         "ofString": " of ",
         "startShuffled": true,
         "jokers": 2,
-        "jokerText": "Joker",
+        //"jokerText": "Joker",
+		"jokerText": {
+			"1": "大王",
+			"2": "小王"
+		},
         "ranks": {
             "2": "Two",
             "3": "Three",

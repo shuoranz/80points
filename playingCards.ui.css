@@ -27,15 +27,15 @@ height: 100%;
 
 .playingCard .corner {
 position: absolute;
-font-size: .5em;
-left: 0.25em;
+font-size: .6em;
+left: 0.20em;
 top: 0.25em;
 }
 .playingCard .cornerBR {
 left: auto;
 top: auto;
-right: 0.25em;
-bottom: 0.25em;
+right: 0.20em;
+bottom: 0.20em;
 }
 
 .playingCard .flip {
@@ -51,7 +51,7 @@ color: #f00;
 
 .playingCard .suit {
 position: absolute;
-z-index:2;
+/* z-index:2; */
 }
 /* large center Ace style suit */
 .playingCard .suit0 {
@@ -62,7 +62,7 @@ top: 0.3em;
 
 .playingCard .face {
 position: absolute;
-z-index:1;
+/* z-index:1; */
 border: 1px solid #000;
 left: 0.6em;
 top: 0.45em;

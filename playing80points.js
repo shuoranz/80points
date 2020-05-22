@@ -5,6 +5,20 @@ $(document).ready(function(){
 	var tablePosition;
 	var trumpRank, trumpSuit;
 	var startTime = new Date();
+	var gameStartTimeStamp;
+	var setGameStartTime = function() {
+		getGameStartTime().done(function(data){
+			gameStartTimeStamp = data;
+		});
+		function getGameStartTime(){
+			return $.ajax({
+				type: 'POST',
+				url: "api.php?a=gst&id=1",
+				async:false
+			});
+		}
+	}
+	setGameStartTime();
 	
 	var cardDeck = $("#cardDeck").playingCards();
 	updateCurrentTable();
@@ -284,7 +298,7 @@ $(document).ready(function(){
 	
 	function updateCurrentTable() {
 		$('#theTable').html('');
-		var currentTableJson, points, playerNamesArray;
+		var currentTableJson, points, playerNamesArray, cronJobTimeStamp;
 		getCurrentTable().done(function(data){
 			currentTableJson = data;
 		});
@@ -292,6 +306,13 @@ $(document).ready(function(){
 		points = currentTableArray['pt'];
 		trumpRank = currentTableArray['tr'];
 		trumpSuit = currentTableArray['ts'];
+		cronJobTimeStamp = currentTableArray['tm'];
+		if (cronJobTimeStamp != gameStartTimeStamp) {
+			cardDeck.init();
+			cardDeck.spread(null, true);
+			$("#orderAllInOne").show();
+			gameStartTimeStamp = cronJobTimeStamp;
+		}
 		$('#showPoint').html("[现在分数：" + points + " ] ");
 
 		if (trumpSuit == "") {
@@ -368,6 +389,8 @@ $(document).ready(function(){
 			$('#tablePlayer_'+position).append(tableCardHTML);
 		}
 	}
+	
+	
 });
         /*
         // if we weren't using jquery to handle the document ready state, we would do this:

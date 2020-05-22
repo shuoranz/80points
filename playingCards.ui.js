@@ -37,12 +37,14 @@
          to.html('');
          // clear (just a demo)
          if (slowly) {
+			 $("#orderAllInOne").hide();
              var thisThis = this;
              var i = 0;
              var endinterval = setInterval(function() {
                  to.append(thisThis.cards[i].getHTML());
                  i++;
                  if (i >= l) {
+					 $("#orderAllInOne").show();
                      clearInterval(endinterval);
                  }
              }, 130);

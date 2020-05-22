@@ -27,6 +27,9 @@
 		case "rpc":
 			regretPostedCard($link);
 			break;
+		case "gst":
+			getStartTimestamp($link);
+			break;
 		default:
 			exit("method not exist");
 	}
@@ -81,7 +84,7 @@
 		$pokerJson = json_encode($PokerSpread);
 		//update game db
 		//prepare SQL
-		$sql = "UPDATE Games SET players = ?, cardsJson = ?, master = ?, points = 0, trumpRank = ?, trumpSuit = '' WHERE id = 1";
+		$sql = "UPDATE Games SET players = ?, cardsJson = ?, master = ?, points = 0, trumpRank = ?, trumpSuit = '', gameStartTimeStamp = NOW() WHERE id = 1";
 		if($stmt = mysqli_prepare($link, $sql)){
             // Bind variables to the prepared statement as parameters
             mysqli_stmt_bind_param($stmt, "ssss", $playerInput, $pokerJson, $masterID, $trumpRank);
@@ -201,13 +204,14 @@
 		}
 		
 		
-		$sql = "SELECT players, points, trumpRank, trumpSuit FROM Games where id = 1";
+		$sql = "SELECT players, points, trumpRank, trumpSuit, gameStartTimeStamp FROM Games where id = 1";
 		$result = $link->query($sql);
 		while($row = $result->fetch_assoc()) {
 			$players = $row["players"];
 			$points = $row["points"];
 			$trumpRank = $row["trumpRank"];
 			$trumpSuit = $row["trumpSuit"];
+			$gameStartTimeStamp = $row["gameStartTimeStamp"];
 		}
 		
 		
@@ -234,6 +238,7 @@
 		$returnArray["pt"] = $points;
 		$returnArray["tr"] = $trumpRank;
 		$returnArray["ts"] = $trumpSuit;
+		$returnArray["tm"] = $gameStartTimeStamp;
 		//$returnArray["nm"] = $playerNames;
 		echo json_encode($returnArray);
 	}
@@ -325,6 +330,31 @@
 					}
 				} else {
 					echo "empty";
+				}
+			}
+		}
+	}
+	
+	function getStartTimestamp($link)
+	{
+		$gameID = 1;
+		$sql = "select gameStartTimeStamp from Games where id = ?";
+		if($stmt = mysqli_prepare($link, $sql)){
+            // Bind variables to the prepared statement as parameters
+            mysqli_stmt_bind_param($stmt, "s", $gameID);
+			if(mysqli_stmt_execute($stmt)){
+                // Store result
+                mysqli_stmt_store_result($stmt);
+                
+                // Check if username exists, if yes then verify password
+                if(mysqli_stmt_num_rows($stmt) == 1){                  
+                    // Bind result variables
+                    mysqli_stmt_bind_result($stmt, $gameStartTimeStamp);
+					if(mysqli_stmt_fetch($stmt)){
+						//$cardsArray = json_decode($cardsJson, true);
+						//echo json_encode($cardsArray[$playerID]);
+						echo $gameStartTimeStamp;
+					}
 				}
 			}
 		}

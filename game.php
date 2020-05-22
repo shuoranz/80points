@@ -12,76 +12,26 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<meta name="description" content="80 points">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Shuoran">
+	<title>丐版80分</title>
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-    <title>丐版80分</title>
-
+	  ga('create', 'UA-41474117-3', 'auto');
+	  ga('set', 'dimension1', '<?php echo $_SESSION["id"]; ?>');
+	  ga('send', 'pageview');
+	</script>
     <link rel="stylesheet" type="text/css" media="all" href="playingCards.ui.css"/>
-    <style type="text/css">
-        body {
-          margin-top: 1.0em;
-          background-color: #fff;
-          font-family: "Helvetica,Arial,FreeSans";
-          color: #000000;
-        }
-        #container {
-          margin: 0 auto;
-          width: 1060px;
-        }
-        h1 { font-size: 40px; color: #64052a; margin-bottom: 3px; }
-        h1 .small { font-size: 0.4em; }
-        h1 a { text-decoration: none }
-        h2 { font-size: 1.5em; color: #64052a; }
-        h3 { text-align: center; color: #64052a; }
-        a { color: #64052a; }
-        .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-        .download { float: right; }
-            pre { background: #000; color: #fff; padding: 15px;}
-        hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
-        .footer { text-align:center; padding-top:30px; font-style: italic; }
-        h2{
-            clear:both;
-        }
-        #error{
-            display:none;color:#f00;border:1px solid #f60;padding:5px;margin:5px;
-        }
-		.tablePlayer{
-			border:1px dashed #f60;
-			height: 6.4em;
-			width: 16%;
-			float: left;
-			position: relative;
-			margin: 14px;
-			/* padding-left: 65px; */
-			padding-left: 0;
-			/*
-			background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='50px' width='170px'><text x='0' y='15' fill='gray' font-size='20'></text></svg>");
-			*/
-		}
-		#yourHand{
-			height: 6.4em;
-			border:1px dashed #f60;
-			margin: 5px;
-			/* padding-left: 65px; */
-			padding-left: 0;
-		}
-		#cardDeck{
-			/* padding-left: 70px; */
-			padding-left: 5px;
-		}
-		.playingCard{
-			/* margin-left: -65px; */
-			margin-left: 0;
-		}
-		
-		#theTable .playingCard{
-			margin-left: -65px;
-		}
-		
-    </style>
-
+	<link rel="stylesheet" type="text/css" media="all" href="playing80points.css"/>
 </head>
 
 <body>
+  <div id="tableDesk">
   <div id="container">
   
     <div id="error"></div>
@@ -89,7 +39,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     <input type="hidden" id="draw" value="draw a card" />
     <input type="hidden" id="shuffleDraw" value="shuffle, then draw" />
     <input type="hidden" id="shuffleSpreadSlow" value="shuffle, then layout slowly" />
-    <div class="info">
+    <div class="info" style="display:none;">
 		<p>账号: <?php echo $_SESSION["username"]; ?>, ID: <span id="pid"><?php echo $_SESSION["id"]; ?></span></p>
 	</div>
 	<h2>桌面牌, <span id="showPoint"></span><span id="showTrumpRank"></span></h2>
@@ -101,16 +51,10 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 	-->
 	
     <div id="theTable"></div>
-	<br/><br/>
-	
-	
-	
-	<!--<h2>要出的牌</h2>-->
-	
-	<br/><br/>
+	<br/><br/><br/><br/>
     
 	
-	<h2>手中牌</h2>
+	<h2 id="handHeader"><?php echo $_SESSION["username"] . " "; ?>手中牌</h2>
 	<input type="button" id="hideCard" value="扣牌" style="display:none;"/>
 	<input type="button" id="sendCard" value="出牌" />
 	<input type="button" id="regretCard" value="悔牌" />
@@ -137,6 +81,6 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     <script type="text/javascript" src="playing80points.js"></script>
 	
   </div>
-
+  </div>
 </body>
 </html>

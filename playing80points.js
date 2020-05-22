@@ -9,7 +9,7 @@ $(document).ready(function(){
 	var cardDeck = $("#cardDeck").playingCards();
 	updateCurrentTable();
 	
-	var cronJob = setInterval(cronJobUpdateTable, 5000);
+	var cronJob = setInterval(cronJobUpdateTable, 3000);
 	
 	if (cardDeck.count() > 26) {
 		var hideCardAmountWord = "";
@@ -297,11 +297,11 @@ $(document).ready(function(){
 		if (trumpSuit == "") {
 			trumpSuitWord = "未定";
 		} else if (trumpSuit == "S") {
-			trumpSuitWord = "草花";
-		} else if (trumpSuit == "C") {
-			trumpSuitWord = "方片";
-		} else if (trumpSuit == "D") {
 			trumpSuitWord = "黑桃";
+		} else if (trumpSuit == "C") {
+			trumpSuitWord = "草花";
+		} else if (trumpSuit == "D") {
+			trumpSuitWord = "方片";
 		} else if (trumpSuit == "H") {
 			trumpSuitWord = "红桃";
 		} else {
@@ -314,11 +314,11 @@ $(document).ready(function(){
 		
 		playersCurrentCards = currentTableArray['pl'];
 		playerAmount = playersCurrentCards.length;
-		var tablePlayerCss = "width: 16%;margin: 14px;padding-left:65px;";
+		var tablePlayerCss = "width: 16%;margin: 13px;padding-left:65px;";
 		if (playerAmount == 6) {
-			tablePlayerCss = "width: 24%;margin: 14px;padding-left:65px;";
+			tablePlayerCss = "width: 24%;margin: 13px;padding-left:65px;";
 		} else if (playerAmount == 10) {
-			tablePlayerCss = "width: 12%;margin: 8px;padding-left:65px;";
+			tablePlayerCss = "width: 12%;margin: 7px;padding-left:65px;";
 		}
 		for (var i = 0; i < playerAmount; i++) {
 			$('#theTable').append('<div class="tablePlayer" style="'+tablePlayerCss+'" id="tablePlayer_' + i + '"></div>');
@@ -356,7 +356,7 @@ $(document).ready(function(){
 		function updateTableCSS(names, index) {
 			Object.keys(names).forEach(function(key) {
 				// console.log(key + names + index);
-				var imageUrl = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='50px' width='240px'><text x='0' y='15' fill='gray' font-size='20' transform='translate(5,30) rotate(-10)'>player "+(index+1)+" => "+names[key]+"</text></svg>";
+				var imageUrl = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='50px' width='240px'><text x='0' y='15' fill='silver' font-size='20' transform='translate(5,30) rotate(-10)'>player "+(index+1)+" => "+names[key]+"</text></svg>";
 				$("#tablePlayer_"+index).css("background-image", "url(\"" + imageUrl + "\")");
 			});
 		}

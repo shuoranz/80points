@@ -83,6 +83,10 @@ if (Array.indexOf === undefined) {
 			//console.log(data);
 			cardJson = data;
 		});
+		if (cardJson == 'null'){
+			$("#handHeader").html("你没在游戏中，请把你的ID号给Dealer [ID:"+playerID+"]");
+			return false;
+		}
 		cardArray = JSON.parse(cardJson);
 		for (var i = 0; i < cardArray.length; i++) {
 			r = cardArray[i]['r'];

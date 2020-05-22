@@ -25,6 +25,9 @@
      * requires jquery (currently)
      */
      playingCards.prototype.spread = function(dest, slowly) {
+		 if (this.cards.length == 0) {
+			 return false;
+		 }
          if (!this.conf.el && !dest) {
              return false;
          }

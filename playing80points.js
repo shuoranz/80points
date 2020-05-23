@@ -291,7 +291,7 @@ $(document).ready(function(){
 	
 	function cronJobUpdateTable() {
 		updateCurrentTable();
-		if (new Date().getTime() - startTime.getTime() > 1000 * 60* 10) {
+		if (new Date().getTime() - startTime.getTime() > 1000 * 60* 60 * 3) {
 			clearTimeout(cronJob);
 		}
 	}

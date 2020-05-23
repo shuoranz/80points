@@ -77,8 +77,8 @@ if (Array.indexOf === undefined) {
 		var cardArray;
 		var cardJson;
 		var playerID = $("#pid").html();
-		//var postResult = $.post( "api.php?a=gtc&p="+playerID, function() {})
-		getServerSpreadCards(playerID).done(function(data){
+		var gameID = $('#gameID').val();
+		getServerSpreadCards(gameID, playerID).done(function(data){
 			//return JSON.parse(serverResult);
 			//console.log(data);
 			cardJson = data;
@@ -104,10 +104,10 @@ if (Array.indexOf === undefined) {
 		// this.cards[l] = new playingCards.card("N", o.jokerText, (j % 2) + 1, '');
     };
 	
-	function getServerSpreadCards(playerID){
+	function getServerSpreadCards(gameID, playerID){
 		return $.ajax({
 			type: 'POST',
-			url: "api.php?a=gtc&p="+playerID,	
+			url: "api.php?gid="+gameID+"&a=gtc&p="+playerID,	
 			async:false
 		});
 	}

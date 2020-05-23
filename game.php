@@ -36,9 +36,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
   
     <div id="error"></div>
 	<input type="hidden" id="trumpRank" value="0" />
-    <input type="hidden" id="draw" value="draw a card" />
-    <input type="hidden" id="shuffleDraw" value="shuffle, then draw" />
-    <input type="hidden" id="shuffleSpreadSlow" value="shuffle, then layout slowly" />
+	<input type="hidden" id="gameID" value="<?php echo $_GET['gid']; ?>" />
     <div class="info" style="display:none;">
 		<p>账号: <?php echo $_SESSION["username"]; ?>, ID: <span id="pid"><?php echo $_SESSION["id"]; ?></span></p>
 	</div>
@@ -48,6 +46,9 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 	<input type="button" id="orderByRank" value="按大小排序" />
     <input type="button" id="orderBySuit" value="按花色排序" />
 	<input type="button" id="orderByTrump" value="按主牌排序" />
+	<input type="hidden" id="draw" value="draw a card" />
+    <input type="hidden" id="shuffleDraw" value="shuffle, then draw" />
+    <input type="hidden" id="shuffleSpreadSlow" value="shuffle, then layout slowly" />
 	-->
 	
     <div id="theTable"></div>

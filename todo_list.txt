@@ -1,17 +1,17 @@
 按优先级排序
-(1)两张+主，反主，反无主
-(2)多桌游戏
+(1)规定出牌顺序，上轮赢家先出，然后下家才能出
+(2)出牌的API,加算输赢和算分的function.POST分的API+算分存分并算赢家。目标是自动化
 (3)api add token
 (4)input validation
-(5)规定出牌顺序，上轮赢家先出，然后下家才能出
-(6)出牌的API,加算输赢和算分的function.POST分的API+算分存分并算赢家。目标是自动化
+(5)两张+主，反主，反无主
+(6)多桌游戏
 (7)每局结束后，根据得分，算下局庄是谁，并自动发下轮牌
 
 解决办法
-(1)前台检查，DB GAME+trumpCardNum col
-(2)DB有ID，Round+gameID col, php get gameID, all api add gid as parameter
+(1)DB round + 出牌顺序index col，在每次算分的API重新update
+(2)算输赢的逻辑较大较难，需要好好想想，写好的很出彩
 (3)Any player should has there own unique token, use token when request API 
 (4)后台给所有api request input做validation, error handler
-(5)DB round + 出牌顺序index col，在每次算分的API重新update
-(6)算输赢的逻辑较大较难，需要好好想想，写好的很出彩
+(5)前台检查，DB GAME+trumpCardNum col
+(6)DB有ID，Round+gameID col, php get gameID, all api add gid as parameter
 (7)blocked by 6

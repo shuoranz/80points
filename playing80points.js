@@ -1,6 +1,7 @@
 $(document).ready(function(){
 	var playerAmount;
 	var playerID = $('#pid').html();
+	var gameID = $('#gameID').val();
 	var hideCardAmount;
 	var tablePosition;
 	var trumpRank, trumpSuit;
@@ -13,7 +14,7 @@ $(document).ready(function(){
 		function getGameStartTime(){
 			return $.ajax({
 				type: 'POST',
-				url: "api.php?a=gst&id=1",
+				url: "api.php?gid="+gameID+"&a=gst&id=1",
 				async:false
 			});
 		}
@@ -25,26 +26,31 @@ $(document).ready(function(){
 	
 	var cronJob = setInterval(cronJobUpdateTable, 3000);
 	
-	if (cardDeck.count() > 26) {
-		var hideCardAmountWord = "";
-		hideCardAmount = 0;
-		if (playerAmount == 4) {
-			hideCardAmountWord = "8张";
-			hideCardAmount = 8;
-		} else if (playerAmount == 6) {
-			hideCardAmountWord = "6张";
-			hideCardAmount = 6;
-		} else if (playerAmount == 8) {
-			hideCardAmountWord = "8张";
-			hideCardAmount = 8;
-		} else if (playerAmount == 10) {
-			hideCardAmountWord = "10张";
-			hideCardAmount = 10;
+	function SendOrHideCard()
+	{
+		if (cardDeck.count() > 26) {
+			var hideCardAmountWord = "";
+			hideCardAmount = 0;
+			if (playerAmount == 4) {
+				hideCardAmountWord = "8张";
+				hideCardAmount = 8;
+			} else if (playerAmount == 6) {
+				hideCardAmountWord = "6张";
+				hideCardAmount = 6;
+			} else if (playerAmount == 8) {
+				hideCardAmountWord = "8张";
+				hideCardAmount = 8;
+			} else if (playerAmount == 10) {
+				hideCardAmountWord = "10张";
+				hideCardAmount = 10;
+			}
+			$('#hideCard').val("扣" + hideCardAmountWord +"牌");
+			$('#hideCard').show();
+			$('#sendCard').hide();
 		}
-		$('#hideCard').val("扣" + hideCardAmountWord +"牌");
-		$('#hideCard').show();
-		$('#sendCard').hide();
 	}
+	SendOrHideCard();
+	
 	var sendTrumpSuit = function(suit){
 		// validation cards have trump suit and number
 		theCards = cardDeck.cards;
@@ -82,7 +88,7 @@ $(document).ready(function(){
 		function sendSuitToServer(suit){
 			return $.ajax({
 				type: 'POST',
-				url: "api.php?a=sts&ts="+suit,
+				url: "api.php?gid="+gameID+"&a=sts&ts="+suit,
 				async:false
 			});
 		}
@@ -224,7 +230,7 @@ $(document).ready(function(){
 		function sendCardToServer(pid, card){
 			return $.ajax({
 				type: 'POST',
-				url: "api.php?a=pdc&p="+pid+"&c="+card,
+				url: "api.php?gid="+gameID+"&a=pdc&p="+pid+"&c="+card,
 				async:false
 			});
 		}
@@ -251,7 +257,7 @@ $(document).ready(function(){
 		function regretPostedCard(pid){
 			return $.ajax({
 				type: 'POST',
-				url: "api.php?a=rpc&p="+pid,
+				url: "api.php?gid="+gameID+"&a=rpc&p="+pid,
 				async:false
 			});
 		}
@@ -308,10 +314,14 @@ $(document).ready(function(){
 		trumpSuit = currentTableArray['ts'];
 		cronJobTimeStamp = currentTableArray['tm'];
 		if (cronJobTimeStamp != gameStartTimeStamp) {
+			/*
 			cardDeck.init();
 			cardDeck.spread(null, true);
 			$("#orderAllInOne").show();
+			SendOrHideCard();
 			gameStartTimeStamp = cronJobTimeStamp;
+			*/
+			location.reload();
 		}
 		$('#showPoint').html("[现在分数：" + points + " ] ");
 
@@ -353,7 +363,7 @@ $(document).ready(function(){
 		function getCurrentTable(){
 			return $.ajax({
 				type: 'POST',
-				url: "api.php?a=gcr",
+				url: "api.php?gid="+gameID+"&a=gcr",
 				async:false
 			});
 		}

@@ -1,0 +1,20 @@
+
+.username-container {
+    position: relative;
+}
+
+#user-exist-default {
+    position: absolute;
+    right: -150px;
+    top:0px;
+    padding-left: 7px;
+    line-height: 34px;
+    height: 34px;
+    width:150px;
+}
+#user-exist-default.exist {
+    color: #a94442;
+}
+#user-exist-default.available {
+    color: green;
+}

@@ -450,7 +450,7 @@
 			// select cards from rounds by pid
 			// if exist, return cards;
 			// else if not exist, return "empty"
-			$playerID = $_REQUEST["p"];
+			$playerID = (int)$_REQUEST["p"];
 			$sql = "select cards from Rounds where pid = ? and cards <>'' and gameID = ?";
 			if($stmt = mysqli_prepare($this->link, $sql)){
 				// Bind variables to the prepared statement as parameters
@@ -473,6 +473,27 @@
 								if(mysqli_stmt_execute($stmt2)){
 									if ($stmt2->affected_rows == 1) {
 										echo $cardsJson;
+
+										//after success regret, add cards back to game;
+										$pid = (int)$playerID;
+										$sqlSelect = "select * from Games where id = " . $this->gameID;
+										$sqlResult = $this->link->query($sqlSelect);
+										while($sqlRow = $sqlResult->fetch_assoc()) {
+											$playersCards = $sqlRow["cardsJson"];
+											$playersCardsArray = json_decode($playersCards, true);
+											foreach(json_decode($cardsJson, true) as $card)
+											{
+												array_push($playersCardsArray[$pid],$card);
+												$playersCardsArray[$pid] = array_values($playersCardsArray[$pid]);
+											}
+											$newCardsJson = json_encode($playersCardsArray);
+											$sqlUpdate = "UPDATE Games SET cardsJson = ? WHERE id = ?";
+											if($stmtUpdate = mysqli_prepare($this->link, $sqlUpdate)){
+												// Bind variables to the prepared statement as parameters
+												mysqli_stmt_bind_param($stmtUpdate, "ss", $newCardsJson, $this->gameID);
+												mysqli_stmt_execute($stmtUpdate);
+											}
+										}
 									}
 								} else {
 									echo "error";

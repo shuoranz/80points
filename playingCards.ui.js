@@ -45,6 +45,7 @@
                  i++;
                  if (i >= l) {
 					 $("#orderAllInOne").show();
+					 $('#functionality').css('display', 'inline-block');
                      clearInterval(endinterval);
                  }
              }, 130);

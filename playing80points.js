@@ -26,9 +26,11 @@ $(document).ready(function(){
 	
 	var cronJob = setInterval(cronJobUpdateTable, 3000);
 	
+	var hideCards;
 	function SendOrHideCard()
 	{
-		if (cardDeck.count() > 26) {
+		var cardCount = cardDeck.count();
+		if (cardCount > 26) {
 			var hideCardAmountWord = "";
 			hideCardAmount = 0;
 			if (playerAmount == 4) {
@@ -44,8 +46,11 @@ $(document).ready(function(){
 				hideCardAmountWord = "10张";
 				hideCardAmount = 10;
 			}
+			hideCards = cardDeck.cards.slice(cardCount - hideCardAmount);
+			cardDeck.cards = cardDeck.cards.slice(0, cardCount - hideCardAmount);
 			$('#hideCard').val("扣" + hideCardAmountWord +"牌");
-			$('#hideCard').show();
+			//$('#hideCard').show();
+			$('#grabCard').show();
 			$('#sendCard').hide();
 		}
 	}
@@ -53,19 +58,48 @@ $(document).ready(function(){
 	
 	var sendTrumpSuit = function(suit){
 		// validation cards have trump suit and number
+		var trumpAmount = $("#setTrumpAmount").val();
 		theCards = cardDeck.cards;
-		for (var i = 0; i < theCards.length; i++) {
-			if (theCards[i]["suit"] == suit && theCards[i]["rank"] == trumpRank) {
-				break;
+
+		if (suit != 'N') {
+			var inCardThisTrumpSuitAmount = 0;
+			for (var i = 0; i < theCards.length; i++) {
+				if (theCards[i]["suit"] == suit && theCards[i]["rank"] == trumpRank) {
+					inCardThisTrumpSuitAmount++;
+				}
+				/*
+				if (i == theCards.length - 1) {
+					alert("你貌似没有此花色主牌");
+					return false;
+				}
+				*/
 			}
-			if (i == theCards.length - 1) {
-				alert("你貌似没有此花色主牌");
+			if (inCardThisTrumpSuitAmount < trumpAmount) {
+				alert("你此花色主牌不够");
+				return false;
+			}
+		} else {
+			var jokerBig = jokerSmall = 0;
+			for (var i = 0; i < theCards.length; i++) {
+				if (suit == theCards[i]["rank"] && theCards[i]["suit"] == "1"){
+					jokerBig++;
+				} else if (suit == theCards[i]["rank"] && theCards[i]["suit"] == "2"){
+					jokerSmall++;
+				}
+			}
+			if (Math.max(jokerBig, jokerSmall) < trumpAmount || Math.max(jokerBig, jokerSmall) <= 1) {
+				alert("你王不够多");
+				return false;
+			}
+			if (trumpAmount <= 1) {
+				alert("最少两个同色王能反主");
 				return false;
 			}
 		}
 		
+		
 		//send to server
-		sendSuitToServer(suit).done(function(data){
+		sendSuitToServer(suit, trumpAmount).done(function(data){
 			if (data == "success") {
 				//putCardOntoTable(tablePosition, hand);
 				var alertSuit = "";
@@ -78,17 +112,17 @@ $(document).ready(function(){
 				} else if (suit == "S") {
 					alertSuit = "黑桃，";
 				} else {
-					alertSuit = "无主？";
+					alertSuit = "无主! ";
 				}
-				alert(alertSuit + "哦了");
+				alert(alertSuit + "哦了~");
 			} else {
 				alert("花色已经定了");
 			}
 		});
-		function sendSuitToServer(suit){
+		function sendSuitToServer(suit, trumpAmount){
 			return $.ajax({
 				type: 'POST',
-				url: "api.php?gid="+gameID+"&a=sts&ts="+suit,
+				url: "api.php?gid="+gameID+"&a=sts&ts="+suit+"&ta="+trumpAmount,
 				async:false
 			});
 		}
@@ -97,6 +131,11 @@ $(document).ready(function(){
 	$('#setTrumpDiamond').click(function(){sendTrumpSuit('D');});
 	$('#setTrumpHeart').click(function(){sendTrumpSuit('H');});
 	$('#setTrumpSpade').click(function(){sendTrumpSuit('S');});
+	$('#setTrumpJoker').click(function(){sendTrumpSuit('N');});
+	$('#giveUpTrump').click(function(){
+		$("#setTrumpDiv").hide();
+		//tell server this player already gave up trump setting
+	});
 	
 	cardDeck.spread(null, true); // show it
 	
@@ -195,7 +234,7 @@ $(document).ready(function(){
 	});
 	
 	var hide = [];
-	var hideCard = function (){
+	var hideCardAction = function (){
 		if (hand.length != hideCardAmount){
 			alert ("扣的不对，应该扣" + hideCardAmount + "张");
 			return false;
@@ -205,6 +244,13 @@ $(document).ready(function(){
 		showHand();
 		$('#hideCard').hide();
 		$('#sendCard').show();
+		//tell server the master which cards were hidden, and calculate points, save to server
+	}
+	var grabCardAction = function (){
+		cardDeck.cards = cardDeck.cards.concat(hideCards);
+		cardDeck.spread();
+		$('#grabCard').hide();
+		$('#hideCard').show();
 	}
 	var sendCard = function (){
 		if (hand.length == 0){
@@ -265,7 +311,8 @@ $(document).ready(function(){
 	var checkTable = function  (){
 		updateCurrentTable();
 	}
-	$('#hideCard').click(hideCard);
+	$('#hideCard').click(hideCardAction);
+	$('#grabCard').click(grabCardAction);
 	$('#sendCard').click(sendCard);
 	$('#regretCard').click(regretCard);
 	$('#checkTable').click(checkTable);
@@ -354,6 +401,12 @@ $(document).ready(function(){
 		for (var i = 0; i < playerAmount; i++) {
 			$('#theTable').append('<div class="tablePlayer" style="'+tablePlayerCss+'" id="tablePlayer_' + i + '"></div>');
 		}
+		if ($("#setTrumpAmount").html() == ""){
+			for (var i = 0; i < playerAmount; i++) {
+				$("#setTrumpAmount").append( '<option value="' + (i+1) + '">' + (i+1) + '</option>' );
+			}
+		}
+		
 		playersCurrentCards.forEach(updateCurrentTableUI);
 		
 		

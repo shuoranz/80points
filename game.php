@@ -56,18 +56,30 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     
 	
 	<h2 id="handHeader"><?php echo $_SESSION["username"] . " "; ?>手中牌</h2>
-	<input type="button" id="hideCard" value="扣牌" style="display:none;"/>
-	<input type="button" id="sendCard" value="出牌" />
-	<input type="button" id="regretCard" value="悔牌" />
-	<input type="hidden" id="addCard" value="把没出的牌放回手中" />
+	<div id="functionality" style="display:none;">
+		<div id="cardOperation" style="display:inline-block;">
+			<input type="button" id="grabCard" value="抓底牌" style="display:none;"/>
+			<input type="button" id="hideCard" value="扣牌" style="display:none;"/>
+			<input type="button" id="sendCard" value="出牌" />
+			<input type="button" id="regretCard" value="悔牌" />
+			<input type="hidden" id="addCard" value="把没出的牌放回手中" />
+			
+			<input type="button" id="orderAllInOne" value="码牌" />
+			<input type="button" id="checkTable" value="刷新桌面" />
+		</div>
+		<div id="setTrumpDiv" style="display:inline-block;">
+			<span>叫主花色:</span>
+			<select name="setTrumpAmount" id="setTrumpAmount"></select>
+			<input type="button" id="setTrumpDiamond" value="方片" />
+			<input type="button" id="setTrumpClub" value="草花" />
+			<input type="button" id="setTrumpHeart" value="红桃" />
+			<input type="button" id="setTrumpSpade" value="黑桃" />
+			<input type="button" id="setTrumpJoker" value="无主" />
+			<input type="button" id="giveUpTrump" value="弃权" />
+		</div>
+	</div>
 	
-	<input type="button" id="orderAllInOne" value="码牌" />
-	<input type="button" id="checkTable" value="刷新桌面" />
-	<span>叫主花色:</span>
-	<input type="button" id="setTrumpDiamond" value="方片" />
-	<input type="button" id="setTrumpClub" value="草花" />
-	<input type="button" id="setTrumpHeart" value="红桃" />
-	<input type="button" id="setTrumpSpade" value="黑桃" />
+	
 	<div id="yourHand"></div>
     <div id="cardDeck"></div>
 	

@@ -113,7 +113,7 @@
 			$pokerJson = json_encode($PokerSpread);
 			//update game db
 			//prepare SQL
-			$sql = "UPDATE Games SET players = ?, cardsJson = ?, master = ?, points = 0, trumpRank = ?, trumpSuit = '', gameStartTimeStamp = NOW() WHERE id = ?";
+			$sql = "UPDATE Games SET players = ?, cardsJson = ?, master = ?, points = 0, trumpRank = ?, trumpSuit = '', gameStartTimeStamp = NOW(), trumpAmount = 0 WHERE id = ?";
 			if($stmt = mysqli_prepare($this->link, $sql)){
 				// Bind variables to the prepared statement as parameters
 				mysqli_stmt_bind_param($stmt, "sssss", $playerInput, $pokerJson, $masterID, $trumpRank, $this->gameID);
@@ -423,23 +423,50 @@
 		function setTrumpSuit()
 		{
 			$trumpSuit = $_REQUEST["ts"];
+			$trumpAmount = $_REQUEST["ta"];
+			$trumpAmount = (int)$trumpAmount;
+			
+			
+			$selectSql = "select * from Games where id = " . $this->gameID;
+			$result = $this->link->query($selectSql);
+			$row = $result->fetch_assoc();
+			$currentTrumpSuit = $row["trumpSuit"];
+			$currentTrumpAmount = $row["trumpAmount"];
+			
 			
 			// update if empty
 			// return failed if 0 affected_rows
 			// update card json to rounds db
-			$sql = "UPDATE Games SET trumpSuit = ? WHERE id = ? and trumpSuit = ''";
-			if($stmt = mysqli_prepare($this->link, $sql)){
-				// Bind variables to the prepared statement as parameters
-				mysqli_stmt_bind_param($stmt, "ss", $trumpSuit, $this->gameID);
-				if(mysqli_stmt_execute($stmt)){
-					if ($stmt->affected_rows == 1) {
+			$flagSetNewTrump = false;
+			if ($currentTrumpSuit == "" && $currentTrumpAmount == 0){
+				$flagSetNewTrump = true;
+			} else if ($trumpSuit == "N" && $trumpAmount >= $currentTrumpAmount) {
+				$flagSetNewTrump = true;
+			} else if ($currentTrumpSuit != $trumpSuit && $trumpAmount > $currentTrumpAmount) {
+				$flagSetNewTrump = true;
+			} else {
+				$flagSetNewTrump = false;
+			}
+			if ($flagSetNewTrump) {
+				$sql = "UPDATE Games SET trumpSuit = ?, trumpAmount = ? WHERE id = ?";
+				if($stmt = mysqli_prepare($this->link, $sql)){
+					// Bind variables to the prepared statement as parameters
+					mysqli_stmt_bind_param($stmt, "sis", $trumpSuit, $trumpAmount, $this->gameID);
+					if(mysqli_stmt_execute($stmt)){
 						echo "success";
+						/*
+						if ($stmt->affected_rows == 1) {
+							echo "success";
+						} else {
+							echo "failed";
+						}
+						*/
 					} else {
-						echo "failed";
+						echo "error";
 					}
-				} else {
-					echo "error";
 				}
+			} else {
+				echo "failed";
 			}
 		}
 		
@@ -755,8 +782,8 @@
 			usort($baseCards, function($a, $b) use ($trumpSuit) {
 				if ($trumpSuit == "")							return 0;
 				if ($trumpSuit == "N")							return 0;
-				if ($a->s == $trumpRank)					return 1;
-				if ($b->s == $trumpRank)					return -1;
+				if ($a->s == $trumpSuit)					return 1;
+				if ($b->s == $trumpSuit)					return -1;
 			});
 			usort($baseCards, function($a, $b) use ($trumpRank) {
 				if ($trumpRank == 0)							return 0;

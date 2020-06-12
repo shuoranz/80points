@@ -26,8 +26,13 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 	  ga('set', 'dimension1', '<?php echo $_SESSION["id"]; ?>');
 	  ga('send', 'pageview');
 	</script>
-    <link rel="stylesheet" type="text/css" media="all" href="playingCards.ui.css"/>
-	<link rel="stylesheet" type="text/css" media="all" href="playing80points.css"/>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	
+    <link rel="stylesheet" type="text/css" media="all" href="css/playingCards.ui.css"/>
+	<link rel="stylesheet" type="text/css" media="all" href="css/playing80points.css"/>
+	<link rel="stylesheet" type="text/css" href="css/modal.css"
 </head>
 
 <body>
@@ -86,12 +91,12 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 	<br/><br/>
 	
 	
+    <div id="alertDialog" title="System Alert"></div>
     
     
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script type="text/javascript" src="playingCards.js"></script>
-    <script type="text/javascript" src="playingCards.ui.js"></script>
-    <script type="text/javascript" src="playing80points.js"></script>
+    <script type="text/javascript" src="js/playingCards.js"></script>
+    <script type="text/javascript" src="js/playingCards.ui.js"></script>
+    <script type="text/javascript" src="js/playing80points.js"></script>
 	
   </div>
   </div>

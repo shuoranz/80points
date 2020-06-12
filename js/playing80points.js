@@ -56,6 +56,18 @@ $(document).ready(function(){
 	}
 	SendOrHideCard();
 	
+	function showAlertDialog(content)
+	{
+		$( "#alertDialog" ).html(content);
+		$( "#alertDialog" ).dialog({
+			height: 100,
+			width: 250,
+			modal: true,
+			resizable: false,
+			dialogClass: 'no-close success-dialog'
+		});
+	}
+	
 	var sendTrumpSuit = function(suit){
 		// validation cards have trump suit and number
 		var trumpAmount = $("#setTrumpAmount").val();
@@ -67,15 +79,9 @@ $(document).ready(function(){
 				if (theCards[i]["suit"] == suit && theCards[i]["rank"] == trumpRank) {
 					inCardThisTrumpSuitAmount++;
 				}
-				/*
-				if (i == theCards.length - 1) {
-					alert("你貌似没有此花色主牌");
-					return false;
-				}
-				*/
 			}
 			if (inCardThisTrumpSuitAmount < trumpAmount) {
-				alert("你此花色主牌不够");
+				showAlertDialog("你此花色主牌不够多");
 				return false;
 			}
 		} else {
@@ -88,11 +94,11 @@ $(document).ready(function(){
 				}
 			}
 			if (Math.max(jokerBig, jokerSmall) < trumpAmount || Math.max(jokerBig, jokerSmall) <= 1) {
-				alert("你王不够多");
+				showAlertDialog("你王不够多");
 				return false;
 			}
 			if (trumpAmount <= 1) {
-				alert("最少两个同色王能反主");
+				showAlertDialog("最少两个同色王能反主");
 				return false;
 			}
 		}
@@ -114,9 +120,9 @@ $(document).ready(function(){
 				} else {
 					alertSuit = "无主! ";
 				}
-				alert(alertSuit + "哦了~");
+				showAlertDialog(alertSuit + "哦了~");
 			} else {
-				alert("花色已经定了");
+				showAlertDialog("花色已经定了");
 			}
 		});
 		function sendSuitToServer(suit, trumpAmount){
@@ -160,7 +166,7 @@ $(document).ready(function(){
 	var doDrawCard = function(){
 		var c = cardDeck.draw();
 		if(!c){
-			alert('no more cards');
+			showAlertDialog('no more cards');
 			return;
 		}
 		hand[hand.length] = c;
@@ -197,7 +203,7 @@ $(document).ready(function(){
 	});
 	$('#addCard').click(function(){
 		if(!hand.length){
-			alert('都没牌了你退啥');
+			showAlertDialog('都没牌了你退啥');
 			return;
 		}
 		var c = hand.pop();
@@ -213,7 +219,7 @@ $(document).ready(function(){
 	$(document).on("click", "#cardDeck .playingCard" , function() {
 		var c = cardDeck.drawByIndex($(this).index());
 		if(!c){
-			alert('恭喜你出完啦');
+			showAlertDialog('恭喜你出完啦');
 			return;
 		}
 		hand[hand.length] = c;
@@ -236,7 +242,7 @@ $(document).ready(function(){
 	var hide = [];
 	var hideCardAction = function (){
 		if (hand.length != hideCardAmount){
-			alert ("扣的不对，应该扣" + hideCardAmount + "张");
+			showAlertDialog("扣的不对，应该扣" + hideCardAmount + "张");
 			return false;
 		}
 		hide = hand;
@@ -254,7 +260,7 @@ $(document).ready(function(){
 	}
 	var sendCard = function (){
 		if (hand.length == 0){
-			alert("请先选牌");
+			showAlertDialog("请先选牌");
 			return false;
 		}
 		var cardsParam = [];
@@ -270,7 +276,7 @@ $(document).ready(function(){
 				hand = [];
 				showHand();
 			} else {
-				alert("你本轮已出过牌了");
+				showAlertDialog("你本轮已出过牌了");
 			}
 		});
 		function sendCardToServer(pid, card){
@@ -285,7 +291,7 @@ $(document).ready(function(){
 		var regretCardsArray;
 		regretPostedCard(playerID).done(function(data){
 			if (data == "empty" || data == "error") {
-				alert("无牌可悔");
+				showAlertDialog("无牌可悔");
 			} else {
 				regretCardsArray = JSON.parse(data);
 				for (var i = 0; i < regretCardsArray.length; i++) {

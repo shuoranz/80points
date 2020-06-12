@@ -1,17 +1,17 @@
 按优先级排序
-(1)规定出牌顺序，上轮赢家先出，然后下家才能出
-(2)出牌的API,加算输赢和算分的function.POST分的API+算分存分并算赢家。目标是自动化
-(3)api add token
-(4)input validation
-(5)两张+主，反主，反无主
-(6)多桌游戏
-(7)每局结束后，根据得分，算下局庄是谁，并自动发下轮牌
 
-解决办法
-(1)DB round + 出牌顺序index col，在每次算分的API重新update
-(2)算输赢的逻辑较大较难，需要好好想想，写好的很出彩
-(3)Any player should has there own unique token, use token when request API 
-(4)后台给所有api request input做validation, error handler
-(5)前台检查，DB GAME+trumpCardNum col
-(6)DB有ID，Round+gameID col, php get gameID, all api add gid as parameter
-(7)blocked by 6
+下次玩之前一定解决：
+(a1) BUG： 庄扣牌后，把扣的分，更新到DB->GAMES->CARDS，并显示到庄家前台。
+(a2) 每轮最后一人出完牌3s后，启动自动算分，如果（刷牌）不能自动，则给最后出牌的人蹦出对话框，人工算分。
+(a3) 前台所有ALERT都变成MODAL,包括人工算分对话框。
+(a4) 后台API新增主牌弃权功能，如果所有人都弃权，则无主？
+
+--------------------------------------------------------------------------------
+
+如有时间，尽快解决
+(b1) 多桌游戏，进入游戏方式
+(b2) 每大局后，显示庄扣了多少分，庄闲输赢，下局打几，谁打。
+
+完全不急
+(c1) API input validation with token
+(c2) Reflect code

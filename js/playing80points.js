@@ -251,6 +251,7 @@ $(document).ready(function(){
 		$('#hideCard').hide();
 		$('#sendCard').show();
 		//tell server the master which cards were hidden, and calculate points, save to server
+		
 	}
 	var grabCardAction = function (){
 		cardDeck.cards = cardDeck.cards.concat(hideCards);
@@ -266,10 +267,10 @@ $(document).ready(function(){
 		var cardsParam = [];
 		for(var i = 0; i < hand.length; i++){
 			//el.append(hand[i].getHTML());
-			console.log(hand[i].rank + hand[i].suit);
+			//console.log(hand[i].rank + hand[i].suit);
 			cardsParam[i] = {"r" : hand[i].rank, 's' : hand[i].suit};
 		}
-		console.log(JSON.stringify(cardsParam));
+		//console.log(JSON.stringify(cardsParam));
 		sendCardToServer(playerID,JSON.stringify(cardsParam)).done(function(data){
 			if (data == "success") {
 				putCardOntoTable(tablePosition, hand);

@@ -57,6 +57,12 @@
 				case "gst":
 					$this->getStartTimestamp();
 					break;
+				case "mhc"
+					$this->masterHideCards();
+					break;
+				case "ats"
+					$this->abandonTrumpSetting();
+					break;
 				default:
 					exit("method not exist");
 			}
@@ -559,6 +565,73 @@
 			}
 		}
 		
+		function masterHideCards()
+		{
+			//input1, playerID
+			$pid = $_REQUEST["p"];
+			//input2, card json [{'3','S'},{'3','S'},{'3','S'}]
+			$cards = $_REQUEST["c"];
+			
+			//calculate points
+			$hidenPoints = 0;
+			foreach(json_decode($cards, true) as $card)
+			{
+				if ($card->r == "5") {
+					$hidenPoints += 5;
+				} else if ($card->r == "10" || $card->r == "K") {
+					$hidenPoints += 10;
+				}
+			}
+			
+			
+			//update points and cards to Games
+			$sqlSelect = "select * from Games where id = " . $this->gameID;
+			$sqlResult = $this->link->query($sqlSelect);
+			while($sqlRow = $sqlResult->fetch_assoc()) {
+				$playersCards = $sqlRow["cardsJson"];
+				$playersCardsArray = json_decode($playersCards, true);
+				foreach(json_decode($cards, true) as $card)
+				{
+					$cardIndex = array_search($card, $playersCardsArray[$pid]);
+					unset($playersCardsArray[$pid][$cardIndex]);
+					$playersCardsArray[$pid] = array_values($playersCardsArray[$pid]);
+				}
+				$newCardsJson = json_encode($playersCardsArray);
+				$sqlUpdate = "UPDATE Games SET cardsJson = ?, hidenPoints = ? WHERE id = ?";
+				if($stmtUpdate = mysqli_prepare($this->link, $sqlUpdate)){
+					// Bind variables to the prepared statement as parameters
+					mysqli_stmt_bind_param($stmtUpdate, "sis", $newCardsJson, $hidenPoints, $this->gameID);
+					mysqli_stmt_execute($stmtUpdate);
+				}
+			}
+		}
+		
+		function abandonTrumpSetting()
+		{
+			//input1, playerID
+			$pid = $_REQUEST["p"];
+			//TODO: Alter abandonTrump to array of players' id, to avoid the duplicate issue
+			
+			$sqlSelect = "select * from Games where id = " . $this->gameID;
+			$sqlResult = $this->link->query($sqlSelect);
+			while($sqlRow = $sqlResult->fetch_assoc()) {
+				$players = $sqlRow['players'];
+				$abandonTrump = $sqlRow['abandonTrump'];
+				if (sizeof($players) == $abandonTrump + 1) {
+					//set joker trump and update abandonTrump count + 1;
+					$sqlUpdate = "UPDATE Games SET abandonTrump = ? WHERE id = ?";
+				} else {
+					//update abandonTrump count + 1;
+					$sqlUpdate = "UPDATE Games SET trumpSuit = 'N', trumpAmount = 5, abandonTrump = ? WHERE id = ?";
+				}
+				
+				if($stmtUpdate = mysqli_prepare($this->link, $sqlUpdate)){
+					// Bind variables to the prepared statement as parameters
+					mysqli_stmt_bind_param($stmtUpdate, "is", $abandonTrump + 1, $this->gameID);
+					mysqli_stmt_execute($stmtUpdate);
+				}
+			}
+		}
 		
 		function settleRoundPoints()
 		{

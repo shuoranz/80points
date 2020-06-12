@@ -119,7 +119,7 @@
 			$pokerJson = json_encode($PokerSpread);
 			//update game db
 			//prepare SQL
-			$sql = "UPDATE Games SET players = ?, cardsJson = ?, master = ?, points = 0, trumpRank = ?, trumpSuit = '', gameStartTimeStamp = NOW(), trumpAmount = 0 WHERE id = ?";
+			$sql = "UPDATE Games SET players = ?, cardsJson = ?, master = ?, points = 0, hidenPoints = 0, abandonTrump = 0, trumpRank = ?, trumpSuit = '', gameStartTimeStamp = NOW(), trumpAmount = 0 WHERE id = ?";
 			if($stmt = mysqli_prepare($this->link, $sql)){
 				// Bind variables to the prepared statement as parameters
 				mysqli_stmt_bind_param($stmt, "sssss", $playerInput, $pokerJson, $masterID, $trumpRank, $this->gameID);

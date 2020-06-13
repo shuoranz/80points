@@ -7,6 +7,7 @@ $(document).ready(function(){
 	var trumpRank, trumpSuit;
 	var startTime = new Date();
 	var gameStartTimeStamp;
+	var playerNamesArray;
 	var setGameStartTime = function() {
 		getGameStartTime().done(function(data){
 			gameStartTimeStamp = data;
@@ -64,7 +65,85 @@ $(document).ready(function(){
 			width: 250,
 			modal: true,
 			resizable: false,
-			dialogClass: 'no-close success-dialog'
+			dialogClass: 'success-dialog',
+			buttons: []
+		});
+	}
+	
+	function showAutoCalculateDialog()
+	{
+		$( "#alertDialog" ).html("本轮结束");
+		$( "#alertDialog" ).dialog({
+			dialogClass: "no-close success-dialog",
+			buttons: [{
+				text: "点击算分",
+				click: function() {
+					$( this ).dialog( "close" );
+					autoCalculatePointsAfterRounds().done(function(data){
+						if (data == "pass") {
+							
+						} else {
+							showManualCalculateDialog();
+						}
+					});
+					function autoCalculatePointsAfterRounds(){
+						return $.ajax({
+							type: 'POST',
+							url: "api.php?gid="+gameID+"&a=fcr",
+							async:false
+						});
+					}
+					
+				}
+			}]
+		});
+	}
+	
+	function showManualCalculateDialog()
+	{
+		var dialogHtml = "系统无法自动算分，请手动算分后提交结果<br>";
+		dialogHtml += '本轮赢家： <select name="winPlayer" id="winPlayer">';
+		dialogHtml += '<option value="null" selected disabled hidden>winner</option>';
+		playerNamesArray.forEach(function(names, index) {
+			Object.keys(names).forEach(function(key) {
+				dialogHtml += '<option value="'+key+'">'+names[key]+'</option>';
+			});
+		});	
+		dialogHtml += '</select>';
+		dialogHtml += '<br>';
+		dialogHtml += '闲家加分： <input type="number" id="winPoints" name="winPoints" min="0" max="500"/>';
+		$( "#alertDialog" ).html(dialogHtml);
+		$( "#alertDialog" ).dialog({
+			dialogClass: "no-close success-dialog",
+			buttons: [{
+				text: "点击提交",
+				click: function() {
+					var winPoints = $("#winPoints").val();
+					var winID = $("#winPlayer").val();
+					if (winPoints != "" && winID && parseInt(winPoints) >= 0 && parseInt(winPoints) <= 500 && parseInt(winPoints)%5 == 0)
+					{
+						manualCalculatePointsAfterRounds().done(function(data){
+							if (data == "pass") {
+								$( "#alertDialog" ).dialog( "close" );
+							} else {
+								$( "#alertDialog" ).dialog( "close" );
+								alert("something wrong, plz call administrator");
+							}
+						});
+						function manualCalculatePointsAfterRounds(){
+							return $.ajax({
+								type: 'POST',
+								url: "api.php?gid="+gameID+"&a=fcr&p="+winPoints+"&w="+winID,
+								async:false
+							});
+						}
+					} else {
+						alert("error! check your input");
+					}
+
+					
+				}
+			}]
 		});
 	}
 	
@@ -139,8 +218,23 @@ $(document).ready(function(){
 	$('#setTrumpSpade').click(function(){sendTrumpSuit('S');});
 	$('#setTrumpJoker').click(function(){sendTrumpSuit('N');});
 	$('#giveUpTrump').click(function(){
-		$("#setTrumpDiv").hide();
+		
 		//tell server this player already gave up trump setting
+		//send to server
+		tellServerAbandonTrump(playerID).done(function(data){
+			if (data == "success") {
+				$("#setTrumpDiv").hide();
+			} else {
+				showAlertDialog("系统错误，无法弃权。");
+			}
+		});
+		function tellServerAbandonTrump(pid){
+			return $.ajax({
+				type: 'POST',
+				url: "api.php?gid="+gameID+"&a=ats&p="+pid,
+				async:false
+			});
+		}
 	});
 	
 	cardDeck.spread(null, true); // show it
@@ -246,18 +340,55 @@ $(document).ready(function(){
 			return false;
 		}
 		hide = hand;
-		hand = [];
-		showHand();
+		
 		$('#hideCard').hide();
 		$('#sendCard').show();
+		
+		var cardsParam = [];
+		for(var i = 0; i < hand.length; i++){
+			//el.append(hand[i].getHTML());
+			//console.log(hand[i].rank + hand[i].suit);
+			cardsParam[i] = {"r" : hand[i].rank, 's' : hand[i].suit};
+		}
+		
 		//tell server the master which cards were hidden, and calculate points, save to server
+		hideCardToServer(playerID,JSON.stringify(cardsParam)).done(function(data){
+			if (data.includes("success:")) {
+				var resultPointArray = data.split(":");
+				$('#showHiddenPoint').html("[扣牌里有"+resultPointArray[1]+"分]");
+				hand = [];
+				showHand();
+			} else {
+				showAlertDialog("系统错误，无法扣牌");
+			}
+		});
+		function hideCardToServer(pid, card){
+			return $.ajax({
+				type: 'POST',
+				url: "api.php?gid="+gameID+"&a=mhc&p="+pid+"&c="+card,
+				async:false
+			});
+		}
 		
 	}
 	var grabCardAction = function (){
-		cardDeck.cards = cardDeck.cards.concat(hideCards);
-		cardDeck.spread();
-		$('#grabCard').hide();
-		$('#hideCard').show();
+		askServerCanGrabCard(playerID).done(function(data){
+			if (data == "success") {
+				cardDeck.cards = cardDeck.cards.concat(hideCards);
+				cardDeck.spread();
+				$('#grabCard').hide();
+				$('#hideCard').show();
+			} else {
+				showAlertDialog("别着急，先定主牌花色");
+			}
+		});
+		function askServerCanGrabCard(pid){
+			return $.ajax({
+				type: 'POST',
+				url: "api.php?gid="+gameID+"&a=cgc",
+				async:false
+			});
+		}
 	}
 	var sendCard = function (){
 		if (hand.length == 0){
@@ -272,7 +403,12 @@ $(document).ready(function(){
 		}
 		//console.log(JSON.stringify(cardsParam));
 		sendCardToServer(playerID,JSON.stringify(cardsParam)).done(function(data){
-			if (data == "success") {
+			if (data == "calculate"){
+				putCardOntoTable(tablePosition, hand);
+				hand = [];
+				showHand();
+				showAutoCalculateDialog();
+			} else if (data == "success") {
 				putCardOntoTable(tablePosition, hand);
 				hand = [];
 				showHand();
@@ -358,7 +494,7 @@ $(document).ready(function(){
 	
 	function updateCurrentTable() {
 		$('#theTable').html('');
-		var currentTableJson, points, playerNamesArray, cronJobTimeStamp;
+		var currentTableJson, points, cronJobTimeStamp, masterPlayerID, trumpSuitAmount;
 		getCurrentTable().done(function(data){
 			currentTableJson = data;
 		});
@@ -366,7 +502,9 @@ $(document).ready(function(){
 		points = currentTableArray['pt'];
 		trumpRank = currentTableArray['tr'];
 		trumpSuit = currentTableArray['ts'];
+		trumpSuitAmount = currentTableArray['ta'];
 		cronJobTimeStamp = currentTableArray['tm'];
+		masterPlayerID = currentTableArray['ms'];
 		if (cronJobTimeStamp != gameStartTimeStamp) {
 			/*
 			cardDeck.init();
@@ -382,17 +520,17 @@ $(document).ready(function(){
 		if (trumpSuit == "") {
 			trumpSuitWord = "未定";
 		} else if (trumpSuit == "S") {
-			trumpSuitWord = "黑桃";
+			trumpSuitWord = "黑桃x"+trumpSuitAmount;
 		} else if (trumpSuit == "C") {
-			trumpSuitWord = "草花";
+			trumpSuitWord = "草花x"+trumpSuitAmount;
 		} else if (trumpSuit == "D") {
-			trumpSuitWord = "方片";
+			trumpSuitWord = "方片x"+trumpSuitAmount;
 		} else if (trumpSuit == "H") {
-			trumpSuitWord = "红桃";
+			trumpSuitWord = "红桃x"+trumpSuitAmount;
 		} else {
-			trumpSuitWord = "无主";
+			trumpSuitWord = "无主x"+trumpSuitAmount;
 		}
-		$('#showTrumpRank').html("[本局主牌：" + trumpRank + ", 花色" + trumpSuitWord + "]");
+		$('#showTrumpRank').html("[本局主牌：" + trumpRank + ", 主色" + trumpSuitWord + "]");
 		$('#trumpRank').val(trumpRank);
 		
 		
@@ -446,8 +584,10 @@ $(document).ready(function(){
 		}
 		function updateTableCSS(names, index) {
 			Object.keys(names).forEach(function(key) {
+				var masterCss = masterPlayerID == key ? "yellow" : "silver";
+				var masterLogo = masterPlayerID == key ? "庄" : "";
 				// console.log(key + names + index);
-				var imageUrl = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='50px' width='240px'><text x='0' y='15' fill='silver' font-size='20' transform='translate(5,30) rotate(-10)'>player "+(index+1)+" => "+names[key]+"</text></svg>";
+				var imageUrl = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='50px' width='240px'><text x='0' y='15' fill='"+masterCss+"' font-size='20' transform='translate(5,30) rotate(-10)'>player "+(index+1)+" "+masterLogo+" => "+names[key]+"</text></svg>";
 				$("#tablePlayer_"+index).css("background-image", "url(\"" + imageUrl + "\")");
 			});
 		}

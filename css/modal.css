@@ -38,3 +38,7 @@
     position: relative;
     font-size: 1em;
 }
+
+.no-close .ui-dialog-titlebar-close {
+  display: none;
+}

@@ -57,11 +57,14 @@
 				case "gst":
 					$this->getStartTimestamp();
 					break;
-				case "mhc"
+				case "mhc":
 					$this->masterHideCards();
 					break;
-				case "ats"
+				case "ats":
 					$this->abandonTrumpSetting();
+					break;
+				case "cgc":
+					$this->canGrabHiddenCard();
 					break;
 				default:
 					exit("method not exist");
@@ -119,7 +122,7 @@
 			$pokerJson = json_encode($PokerSpread);
 			//update game db
 			//prepare SQL
-			$sql = "UPDATE Games SET players = ?, cardsJson = ?, master = ?, points = 0, hidenPoints = 0, abandonTrump = 0, trumpRank = ?, trumpSuit = '', gameStartTimeStamp = NOW(), trumpAmount = 0 WHERE id = ?";
+			$sql = "UPDATE Games SET players = ?, cardsJson = ?, master = ?, points = 0, hiddenPoints = 0, abandonTrump = 0, trumpRank = ?, trumpSuit = '', gameStartTimeStamp = NOW(), trumpAmount = 0 WHERE id = ?";
 			if($stmt = mysqli_prepare($this->link, $sql)){
 				// Bind variables to the prepared statement as parameters
 				mysqli_stmt_bind_param($stmt, "sssss", $playerInput, $pokerJson, $masterID, $trumpRank, $this->gameID);
@@ -361,7 +364,7 @@
 			}
 			
 			
-			$sql = "SELECT players, points, trumpRank, trumpSuit, gameStartTimeStamp FROM Games where id = " . (int)$this->gameID;
+			$sql = "SELECT players, points, trumpRank, trumpSuit, gameStartTimeStamp, master, trumpAmount FROM Games where id = " . (int)$this->gameID;
 			$result = $this->link->query($sql);
 			while($row = $result->fetch_assoc()) {
 				$players = $row["players"];
@@ -369,6 +372,8 @@
 				$trumpRank = $row["trumpRank"];
 				$trumpSuit = $row["trumpSuit"];
 				$gameStartTimeStamp = $row["gameStartTimeStamp"];
+				$masterPlayerId = $row["master"];
+				$trumpSuitAmount = $row["trumpAmount"];
 			}
 			
 			
@@ -396,6 +401,8 @@
 			$returnArray["tr"] = $trumpRank;
 			$returnArray["ts"] = $trumpSuit;
 			$returnArray["tm"] = $gameStartTimeStamp;
+			$returnArray["ms"] = $masterPlayerId;
+			$returnArray["ta"] = $trumpSuitAmount;
 			//$returnArray["nm"] = $playerNames;
 			echo json_encode($returnArray);
 		}
@@ -450,6 +457,8 @@
 				$flagSetNewTrump = true;
 			} else if ($currentTrumpSuit != $trumpSuit && $trumpAmount > $currentTrumpAmount) {
 				$flagSetNewTrump = true;
+			} else if ($currentTrumpSuit == $trumpSuit && $trumpAmount > $currentTrumpAmount) {
+				$flagSetNewTrump = true;	//secure same color
 			} else {
 				$flagSetNewTrump = false;
 			}
@@ -573,13 +582,13 @@
 			$cards = $_REQUEST["c"];
 			
 			//calculate points
-			$hidenPoints = 0;
+			$hiddenPoints = 0;
 			foreach(json_decode($cards, true) as $card)
 			{
-				if ($card->r == "5") {
-					$hidenPoints += 5;
-				} else if ($card->r == "10" || $card->r == "K") {
-					$hidenPoints += 10;
+				if ($card["r"] == "5") {
+					$hiddenPoints += 5;
+				} else if ($card["r"] == "10" || $card["r"] == "K") {
+					$hiddenPoints += 10;
 				}
 			}
 			
@@ -597,11 +606,12 @@
 					$playersCardsArray[$pid] = array_values($playersCardsArray[$pid]);
 				}
 				$newCardsJson = json_encode($playersCardsArray);
-				$sqlUpdate = "UPDATE Games SET cardsJson = ?, hidenPoints = ? WHERE id = ?";
+				$sqlUpdate = "UPDATE Games SET cardsJson = ?, hiddenPoints = ? WHERE id = ?";
 				if($stmtUpdate = mysqli_prepare($this->link, $sqlUpdate)){
 					// Bind variables to the prepared statement as parameters
-					mysqli_stmt_bind_param($stmtUpdate, "sis", $newCardsJson, $hidenPoints, $this->gameID);
+					mysqli_stmt_bind_param($stmtUpdate, "sis", $newCardsJson, $hiddenPoints, $this->gameID);
 					mysqli_stmt_execute($stmtUpdate);
+					echo "success:$hiddenPoints";
 				}
 			}
 		}
@@ -617,18 +627,33 @@
 			while($sqlRow = $sqlResult->fetch_assoc()) {
 				$players = $sqlRow['players'];
 				$abandonTrump = $sqlRow['abandonTrump'];
-				if (sizeof($players) == $abandonTrump + 1) {
-					//set joker trump and update abandonTrump count + 1;
-					$sqlUpdate = "UPDATE Games SET abandonTrump = ? WHERE id = ?";
-				} else {
+				$playersArray = explode(",",$players);
+				if (sizeof($playersArray) == $abandonTrump + 1) {
 					//update abandonTrump count + 1;
 					$sqlUpdate = "UPDATE Games SET trumpSuit = 'N', trumpAmount = 5, abandonTrump = ? WHERE id = ?";
+				} else {
+					//set joker trump and update abandonTrump count + 1;
+					$sqlUpdate = "UPDATE Games SET abandonTrump = ? WHERE id = ?";
 				}
-				
+				$abandonTrump += 1;
 				if($stmtUpdate = mysqli_prepare($this->link, $sqlUpdate)){
 					// Bind variables to the prepared statement as parameters
-					mysqli_stmt_bind_param($stmtUpdate, "is", $abandonTrump + 1, $this->gameID);
+					mysqli_stmt_bind_param($stmtUpdate, "is", $abandonTrump, $this->gameID);
 					mysqli_stmt_execute($stmtUpdate);
+					echo "success";
+				}
+			}
+		}
+		
+		function canGrabHiddenCard()
+		{
+			$sqlSelect = "select * from Games where id = " . $this->gameID;
+			$sqlResult = $this->link->query($sqlSelect);
+			while($sqlRow = $sqlResult->fetch_assoc()) {
+				if (empty($sqlRow['trumpSuit'])) {
+					echo "empty";
+				} else {
+					echo "success";
 				}
 			}
 		}

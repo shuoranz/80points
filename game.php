@@ -45,7 +45,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     <div class="info" style="display:none;">
 		<p>账号: <?php echo $_SESSION["username"]; ?>, ID: <span id="pid"><?php echo $_SESSION["id"]; ?></span></p>
 	</div>
-	<h2>桌面牌, <span id="showPoint"></span><span id="showTrumpRank"></span></h2>
+	<h2>桌面牌, <span id="showPoint"></span><span id="showHiddenPoint"></span><span id="showTrumpRank"></span></h2>
 	<input type="hidden" id="shuffler" value="打散" />
 	<!--
 	<input type="button" id="orderByRank" value="按大小排序" />

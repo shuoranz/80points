@@ -186,6 +186,19 @@ if (Array.indexOf === undefined) {
 	playingCards.prototype.orderByTrump = function() {
 		this.cards.sort(compareTrump);
     }
+	
+	playingCards.prototype.orderCardsByRank = function(theCards) {
+        return theCards.sort(compareRank);
+    }
+
+    playingCards.prototype.orderCardsBySuit = function(theCards) {
+        //this.init();
+		return theCards.sort(compareSuit);
+    }
+	
+	playingCards.prototype.orderCardsByTrump = function(theCards) {
+		return theCards.sort(compareTrump);
+    }
 
     /*
      * requires jquery (currently)
@@ -328,11 +341,19 @@ if (Array.indexOf === undefined) {
     }
 	
 	function compareSuit(a,b) {
+		var trumpSuit = $('#trumpSuit').val();
 		if (a.suit == b.suit)                       return 0;
 		if (a.suit == "1")							return 1;
 		if (b.suit == "1")							return -1;
 		if (a.suit == "2")							return 1;
 		if (b.suit == "2")							return -1;
+		
+		if (trumpSuit == 'C' || trumpSuit == 'D' || trumpSuit == 'H' || trumpSuit == 'S')
+		{
+			if (a.suit == trumpSuit)				return 1;
+			if (b.suit == trumpSuit)				return -1;
+		}
+		
 		if (a.suit == "D")							return -1;
 		if (a.suit == "S")							return 1;
 		if (b.suit == "D")							return 1;
@@ -345,8 +366,14 @@ if (Array.indexOf === undefined) {
 		// 这么写挺不好的
 		var trumpRank = $('#trumpRank').val();
 		if (trumpRank == 0)							return 0;
+		if (a.rank == b.rank)						return 0;
+		if (a.suit == "1")							return 1;
+		if (b.suit == "1")							return -1;
+		if (a.suit == "2")							return 1;
+		if (b.suit == "2")							return -1;
 		if (a.rank == trumpRank)					return 1;
 		if (b.rank == trumpRank)					return -1;
 	}
+	
 
 })(this,this.document);

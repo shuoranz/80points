@@ -41,6 +41,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
   
     <div id="error"></div>
 	<input type="hidden" id="trumpRank" value="0" />
+	<input type="hidden" id="trumpSuit" value="" />
 	<input type="hidden" id="gameID" value="<?php echo $_GET['gid']; ?>" />
     <div class="info" style="display:none;">
 		<p>账号: <?php echo $_SESSION["username"]; ?>, ID: <span id="pid"><?php echo $_SESSION["id"]; ?></span></p>

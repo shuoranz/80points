@@ -75,6 +75,10 @@ $(document).ready(function(){
 		$( "#alertDialog" ).html("本轮结束");
 		$( "#alertDialog" ).dialog({
 			dialogClass: "no-close success-dialog",
+			height: 200,
+			width: 350,
+			modal: true,
+			resizable: false,
 			buttons: [{
 				text: "点击算分",
 				click: function() {
@@ -115,6 +119,10 @@ $(document).ready(function(){
 		$( "#alertDialog" ).html(dialogHtml);
 		$( "#alertDialog" ).dialog({
 			dialogClass: "no-close success-dialog",
+			height: 200,
+			width: 350,
+			modal: true,
+			resizable: false,
 			buttons: [{
 				text: "点击提交",
 				click: function() {
@@ -285,6 +293,12 @@ $(document).ready(function(){
 		cardDeck.orderByTrump();
 		cardDeck.spread();
 	}
+	var sortTheCards = function(theCards){
+		theCards = cardDeck.orderCardsByRank(theCards);
+		theCards = cardDeck.orderCardsBySuit(theCards);
+		theCards = cardDeck.orderCardsByTrump(theCards);
+		return theCards;
+	}
 	$('#shuffler').click(doShuffle);
 	$('#draw').click(doDrawCard);
 	$('#shuffleDraw').click(function(){
@@ -396,6 +410,7 @@ $(document).ready(function(){
 			return false;
 		}
 		var cardsParam = [];
+		hand = sortTheCards(hand);
 		for(var i = 0; i < hand.length; i++){
 			//el.append(hand[i].getHTML());
 			//console.log(hand[i].rank + hand[i].suit);
@@ -403,15 +418,17 @@ $(document).ready(function(){
 		}
 		//console.log(JSON.stringify(cardsParam));
 		sendCardToServer(playerID,JSON.stringify(cardsParam)).done(function(data){
-			if (data == "calculate"){
+			if (data.includes("calculate")){
 				putCardOntoTable(tablePosition, hand);
 				hand = [];
 				showHand();
 				showAutoCalculateDialog();
-			} else if (data == "success") {
+			} else if (data.includes("success")) {
 				putCardOntoTable(tablePosition, hand);
 				hand = [];
 				showHand();
+			} else if (data.includes("notYourTurn")) {
+				showAlertDialog("憋着急，还没到你呢");
 			} else {
 				showAlertDialog("你本轮已出过牌了");
 			}
@@ -532,6 +549,7 @@ $(document).ready(function(){
 		}
 		$('#showTrumpRank').html("[本局主牌：" + trumpRank + ", 主色" + trumpSuitWord + "]");
 		$('#trumpRank').val(trumpRank);
+		$('#trumpSuit').val(trumpSuit);
 		
 		
 		

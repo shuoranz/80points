@@ -263,7 +263,6 @@
 		{
 			//input1, playerID
 			$pid = $_REQUEST["p"];
-			//input2, card json [{'3','S'},{'3','S'},{'3','S'}]
 			$cards = $_REQUEST["c"];
 			//input3, rounds, valid purpose (TODO)
 			
@@ -272,7 +271,7 @@
 			$sql = "select * from Rounds where cards = '' and thisRoundOrder < (select max(thisRoundOrder) from Rounds where cards = '' and pid = ? and gameID = ?)";
 			if($stmt = mysqli_prepare($this->link, $sql)){
 				// Bind variables to the prepared statement as parameters
-				mysqli_stmt_bind_param($stmt, "ss", $gameID, $pid);
+				mysqli_stmt_bind_param($stmt, "ss", $pid, $gameID);
 				if(mysqli_stmt_execute($stmt)){
 					// Store result
 					mysqli_stmt_store_result($stmt);
@@ -332,18 +331,17 @@
 			/*
 			 * Delete for now
 			 * 
-			 *
+			 */
 			//determine finish round or not
-			$sql = "SELECT * FROM Rounds where card = '' and gameID = " . (int)$this->gameID;
-			$result = $this->link->query($sql);
-			if ($result = mysqli_query($con,$sql))
+			$sql = "SELECT * FROM Rounds where cards = '' and gameID = " . (int)$this->gameID;
+			if ($result = $this->link->query($sql))
 			{
 				if (mysqli_num_rows($result) == 0)
 				{
-					$requestResult = file_get_contents('api.php?gid='.$this->gameID.'&a=fcr');
+					//$requestResult = file_get_contents('api.php?gid='.$this->gameID.'&a=fcr');
+					echo "calculate";
 				}
 			}
-			*/
 		}
 		
 		function getCurrentRound()
@@ -702,7 +700,7 @@
 						$player2Cards = $player1Cards;
 					} else if ($compareResult == "twoWin") {
 						$winner = $row['pid'];
-					} else if ($compareResult == "notSure") {
+					} else if (strpos($compareResult, "notSure") !== false) {
 						$returnResult["result"] = "manual";
 						return $returnResult;
 					}
@@ -720,8 +718,9 @@
 			$baseCardsArray = json_decode($player1Cards);
 			$newCardsArray = json_decode($player2Cards);
 			
-			$baseCardsArray = $this->_sortCards($baseCardsArray, $trumpRank, $trumpSuit);
-			$newCardsArray = $this->_sortCards($newCardsArray, $trumpRank, $trumpSuit);
+			//sort is a better have, currently sort in front end. The backend sort has bug.
+			//$baseCardsArray = $this->_sortCards($baseCardsArray, $trumpRank, $trumpSuit);
+			//$newCardsArray = $this->_sortCards($newCardsArray, $trumpRank, $trumpSuit);
 			
 			//一共四种花色： 三普通 + 一主色 或五种花色：四普通+一主色
 			$baseColor = $this->_isCardsSameColor($baseCardsArray, $trumpRank, $trumpSuit);
@@ -880,11 +879,13 @@
 			usort($baseCards, function($a, $b) use ($trumpSuit) {
 				if ($trumpSuit == "")							return 0;
 				if ($trumpSuit == "N")							return 0;
+				if ($a->s == $trumpSuit && $b->s == $trumpSuit) return 0;
 				if ($a->s == $trumpSuit)					return 1;
 				if ($b->s == $trumpSuit)					return -1;
 			});
 			usort($baseCards, function($a, $b) use ($trumpRank) {
 				if ($trumpRank == 0)							return 0;
+				if ($a->r == $trumpRank && $b->r == $trumpRank)return 0;
 				if ($a->r == $trumpRank)					return 1;
 				if ($b->r == $trumpRank)					return -1;
 				
@@ -1052,10 +1053,26 @@
 			$rank2 = array_search($card2->r, $cardOrder);
 			if ($card1->r == 'N' && $card1->s == '1') {
 				//大王rank再加一
+				$rank1 += 2;
+			}
+			if ($card2->r == 'N' && $card2->s == '1') {
+				//大王rank再加一
+				$rank2 += 2;
+			}
+			if ($card1->r == 'N' && $card1->s == '1') {
+				//大王rank再加一
 				$rank1 += 1;
 			}
 			if ($card2->r == 'N' && $card2->s == '1') {
 				//大王rank再加一
+				$rank2 += 1;
+			}
+			if ($card1->r == $trumpRank && $card1->s == $trumpSuit) {
+				//主二再加1
+				$rank1 += 1;
+			}
+			if ($card2->r == $trumpRank && $card2->s == $trumpSuit) {
+				//主二再加1
 				$rank2 += 1;
 			}
 			return $rank1 - $rank2;

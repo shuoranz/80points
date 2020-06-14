@@ -511,7 +511,7 @@ $(document).ready(function(){
 	
 	function updateCurrentTable() {
 		$('#theTable').html('');
-		var currentTableJson, points, cronJobTimeStamp, masterPlayerID, trumpSuitAmount;
+		var currentTableJson, points, cronJobTimeStamp, masterPlayerID, trumpSuitAmount, currentPlayerID;
 		getCurrentTable().done(function(data){
 			currentTableJson = data;
 		});
@@ -522,6 +522,7 @@ $(document).ready(function(){
 		trumpSuitAmount = currentTableArray['ta'];
 		cronJobTimeStamp = currentTableArray['tm'];
 		masterPlayerID = currentTableArray['ms'];
+		currentPlayerID = currentTableArray['cp'];
 		if (cronJobTimeStamp != gameStartTimeStamp) {
 			/*
 			cardDeck.init();
@@ -602,7 +603,7 @@ $(document).ready(function(){
 		}
 		function updateTableCSS(names, index) {
 			Object.keys(names).forEach(function(key) {
-				var masterCss = masterPlayerID == key ? "yellow" : "silver";
+				var masterCss = currentPlayerID == key ? "yellow" : "silver";
 				var masterLogo = masterPlayerID == key ? "庄" : "";
 				// console.log(key + names + index);
 				var imageUrl = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='50px' width='240px'><text x='0' y='15' fill='"+masterCss+"' font-size='20' transform='translate(5,30) rotate(-10)'>player "+(index+1)+" "+masterLogo+" => "+names[key]+"</text></svg>";

@@ -352,13 +352,17 @@
 			$returnArray = array();
 			
 			
-			$sql = "SELECT pid, cards FROM Rounds where gameID = " . (int)$this->gameID;
+			$sql = "SELECT pid, cards FROM Rounds where gameID = " . (int)$this->gameID . " order by thisRoundOrder asc";
 			$result = $this->link->query($sql);
 			$playaerCards = array();
 			$players = $points = "";
+			$currentPlayerId = 0;
 			while($row = $result->fetch_assoc()) {
 				// echo "id: " . $row["id"]. " - Name: " . $row["firstname"]. " " . $row["lastname"]. "<br>";
 				$playaerCards[$row["pid"]] = $row["cards"];
+				if ($currentPlayerId == 0 && $row["cards"] == "") {
+					$currentPlayerId = $row["pid"];
+				}
 			}
 			
 			
@@ -401,7 +405,7 @@
 			$returnArray["tm"] = $gameStartTimeStamp;
 			$returnArray["ms"] = $masterPlayerId;
 			$returnArray["ta"] = $trumpSuitAmount;
-			//$returnArray["nm"] = $playerNames;
+			$returnArray["cp"] = $currentPlayerId;
 			echo json_encode($returnArray);
 		}
 		
@@ -802,43 +806,6 @@
 			return $returnResult;
 		}
 		
-		private function getNormalCardPossibleTypes($cardLength)
-		{
-			switch ($cardLength) {
-			case 1:
-				return array('A');
-				break;
-			case 2:
-				return array('AA');
-				break;
-			case 3:
-				return array('AAA');
-				break;
-			case 4:
-				return array('AAAA','AABB');
-				break;
-			case 5:
-				return array('AAAAA');
-				break;
-			case 6:
-				return array('AABBCC','AAABBB');
-				break;
-			case 8:
-				return array('AABBCCDD','AAAABBBB');
-				break;
-			case 9:
-				return array('AAABBBCCC');
-				break;
-			case 10:
-				return array('AABBCCDDEE','AAAAABBBBB');
-				break;
-			case 12:
-				return array('AABBCCDDEEFF');
-				break;
-			default:
-				return array();
-			}
-		}
 		
 		private function _sortCards($baseCards, $trumpRank, $trumpSuit)
 		{

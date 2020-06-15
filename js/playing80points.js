@@ -566,7 +566,7 @@ $(document).ready(function(){
 			$('#theTable').append('<div class="tablePlayer" style="'+tablePlayerCss+'" id="tablePlayer_' + i + '"></div>');
 		}
 		if ($("#setTrumpAmount").html() == ""){
-			for (var i = 0; i < playerAmount; i++) {
+			for (var i = 0; i < playerAmount / 2; i++) {
 				$("#setTrumpAmount").append( '<option value="' + (i+1) + '">' + (i+1) + '</option>' );
 			}
 		}

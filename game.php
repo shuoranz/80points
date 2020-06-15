@@ -71,7 +71,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 			<input type="hidden" id="addCard" value="把没出的牌放回手中" />
 			
 			<input type="button" id="orderAllInOne" value="码牌" />
-			<input type="button" id="checkTable" value="刷新桌面" />
+			<input type="hidden" id="checkTable" value="刷新桌面" />
 		</div>
 		<div id="setTrumpDiv" style="display:inline-block;">
 			<span>叫主花色:</span>

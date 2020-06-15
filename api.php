@@ -1009,9 +1009,14 @@
 				return 0;
 			}
 			$trumpRound = ($card1->r == $trumpRank || $card1->r == 'N' || $card1->s == $trumpSuit) ? true : false;
-			$cardOrder = array('2','3','4','5','6','7','8','9','10','J','Q','K','A');
-			if (($key = array_search($trumpRank, $cardOrder)) !== false) {
-				unset($cardOrder[$key]);
+			$cardOrderOriginal = array('2','3','4','5','6','7','8','9','10','J','Q','K','A');
+			if (($key = array_search($trumpRank, $cardOrderOriginal)) !== false) {
+				unset($cardOrderOriginal[$key]);
+			}
+			$cardOrder = array();
+			foreach ($cardOrderOriginal as $orderOriginal)
+			{
+			    array_push($cardOrder,$orderOriginal);
 			}
 			if ($trumpRound) {
 				array_push($cardOrder,$trumpRank,'N');
@@ -1026,11 +1031,11 @@
 				//大王rank再加一
 				$rank2 += 2;
 			}
-			if ($card1->r == 'N' && $card1->s == '1') {
+			if ($card1->r == 'N' && $card1->s == '2') {
 				//大王rank再加一
 				$rank1 += 1;
 			}
-			if ($card2->r == 'N' && $card2->s == '1') {
+			if ($card2->r == 'N' && $card2->s == '2') {
 				//大王rank再加一
 				$rank2 += 1;
 			}
